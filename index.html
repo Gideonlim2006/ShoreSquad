@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Rally your crew, track weather, and hit the next beach cleanup with ShoreSquad - the dope map app for eco-warriors!">
+    <meta name="keywords" content="beach cleanup, environmental, weather tracking, community, eco-friendly">
+    <meta name="author" content="ShoreSquad">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="ShoreSquad - Beach Cleanup Community">
+    <meta property="og:description" content="Rally your crew, track weather, and hit the next beach cleanup with our dope map app!">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://shoresquad.com">
+    
+    <!-- Twitter Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ShoreSquad - Beach Cleanup Community">
+    <meta name="twitter:description" content="Rally your crew, track weather, and hit the next beach cleanup with our dope map app!">
+    
+    <title>ShoreSquad - Rally Your Crew for Beach Cleanups</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="#" class="nav-logo" aria-label="ShoreSquad Home">
+                    <i class="fas fa-water" aria-hidden="true"></i>
+                    <span>ShoreSquad</span>
+                </a>
+                <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+            <ul class="nav-menu" role="menubar">
+                <li class="nav-item" role="none">
+                    <a href="#home" class="nav-link" role="menuitem">Home</a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a href="#events" class="nav-link" role="menuitem">Events</a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a href="#weather" class="nav-link" role="menuitem">Weather</a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a href="#community" class="nav-link" role="menuitem">Community</a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a href="#contact" class="nav-link" role="menuitem">Contact</a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a href="#join" class="nav-link nav-cta" role="menuitem">Join Squad</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero" aria-labelledby="hero-title">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <h1 id="hero-title" class="hero-title">
+                        Rally Your Crew for the Next
+                        <span class="highlight">Beach Cleanup</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Track weather, find events, and connect with eco-warriors in your area. 
+                        Making beach cleanups fun, social, and impactful!
+                    </p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary" onclick="scrollToSection('events')" aria-describedby="find-events-desc">
+                            <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
+                            Find Events Near Me
+                        </button>
+                        <button class="btn btn-secondary" onclick="scrollToSection('weather')" aria-describedby="check-weather-desc">
+                            <i class="fas fa-cloud-sun" aria-hidden="true"></i>
+                            Check Weather
+                        </button>
+                    </div>
+                    <div class="sr-only">
+                        <p id="find-events-desc">Discover beach cleanup events happening in your local area</p>
+                        <p id="check-weather-desc">View current weather conditions for beach cleanup planning</p>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="hero-visual">
+                        <i class="fas fa-users" aria-hidden="true"></i>
+                        <i class="fas fa-leaf" aria-hidden="true"></i>
+                        <i class="fas fa-water" aria-hidden="true"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" aria-labelledby="features-title">
+            <div class="container">
+                <h2 id="features-title" class="section-title">Why ShoreSquad Rocks</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                        </div>
+                        <h3>Smart Event Mapping</h3>
+                        <p>Find beach cleanups near you with our interactive map. Filter by date, difficulty, and group size.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-cloud-sun-rain" aria-hidden="true"></i>
+                        </div>
+                        <h3>Weather Intelligence</h3>
+                        <p>Real-time weather tracking ensures perfect conditions for your cleanup adventures.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users" aria-hidden="true"></i>
+                        </div>
+                        <h3>Squad Building</h3>
+                        <p>Connect with like-minded eco-warriors and build lasting friendships while saving the planet.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Events Section -->
+        <section id="events" class="events" aria-labelledby="events-title">
+            <div class="container">
+                <h2 id="events-title" class="section-title">Upcoming Beach Cleanups</h2>
+                <div class="events-filter">
+                    <button class="filter-btn active" data-filter="all">All Events</button>
+                    <button class="filter-btn" data-filter="today">Today</button>
+                    <button class="filter-btn" data-filter="weekend">This Weekend</button>
+                    <button class="filter-btn" data-filter="week">This Week</button>
+                </div>
+                <div class="events-grid" id="events-container">
+                    <!-- Events will be populated by JavaScript -->
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-outline" onclick="loadMoreEvents()">
+                        Load More Events
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Weather Section -->
+        <section id="weather" class="weather" aria-labelledby="weather-title">
+            <div class="container">
+                <h2 id="weather-title" class="section-title">Weather Conditions</h2>
+                <div class="weather-widget" id="weather-widget">
+                    <div class="weather-search">
+                        <input type="text" id="location-input" placeholder="Enter your location..." aria-label="Location search">
+                        <button onclick="getWeather()" aria-label="Get weather for location">
+                            <i class="fas fa-search" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="weather-display" id="weather-display">
+                        <!-- Weather data will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Community Section -->
+        <section id="community" class="community" aria-labelledby="community-title">
+            <div class="container">
+                <h2 id="community-title" class="section-title">Join Our Community</h2>
+                <div class="community-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" data-count="1250">0</div>
+                        <div class="stat-label">Active Members</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" data-count="89">0</div>
+                        <div class="stat-label">Beach Cleanups</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" data-count="15600">0</div>
+                        <div class="stat-label">Pounds of Trash Removed</div>
+                    </div>
+                </div>
+                <div class="testimonials">
+                    <div class="testimonial">
+                        <p>"ShoreSquad made it so easy to find people who care about the environment. The weather tracking is a game-changer!"</p>
+                        <cite>- Alex, Miami Squad Leader</cite>
+                    </div>
+                    <div class="testimonial">
+                        <p>"I've met my best friends through beach cleanups. This app brings the community together like nothing else."</p>
+                        <cite>- Sarah, California Coast Cleaner</cite>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact" aria-labelledby="contact-title">
+            <div class="container">
+                <h2 id="contact-title" class="section-title">Get In Touch</h2>
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <h3>Ready to Make Waves?</h3>
+                        <p>Have questions, suggestions, or want to organize a cleanup in your area? We'd love to hear from you!</p>
+                        <div class="contact-methods">
+                            <div class="contact-method">
+                                <i class="fas fa-envelope" aria-hidden="true"></i>
+                                <span>hello@shoresquad.com</span>
+                            </div>
+                            <div class="contact-method">
+                                <i class="fas fa-phone" aria-hidden="true"></i>
+                                <span>+1 (555) CLEANUP</span>
+                            </div>
+                            <div class="contact-method">
+                                <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                                <span>Coastal Communities Worldwide</span>
+                            </div>
+                        </div>
+                    </div>
+                    <form class="contact-form" id="contact-form" aria-label="Contact form">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" required aria-describedby="name-error">
+                            <span class="error-message" id="name-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required aria-describedby="email-error">
+                            <span class="error-message" id="email-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <select id="subject" name="subject" required aria-describedby="subject-error">
+                                <option value="">Select a topic...</option>
+                                <option value="event">Organize an Event</option>
+                                <option value="feedback">App Feedback</option>
+                                <option value="partnership">Partnership Inquiry</option>
+                                <option value="support">Technical Support</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <span class="error-message" id="subject-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" rows="5" required aria-describedby="message-error"></textarea>
+                            <span class="error-message" id="message-error"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Join Section -->
+        <section id="join" class="join-section" aria-labelledby="join-title">
+            <div class="container">
+                <div class="join-content">
+                    <h2 id="join-title">Ready to Join the Squad?</h2>
+                    <p>Start making a difference today. Download the app and connect with your local eco-community!</p>
+                    <div class="app-download">
+                        <button class="btn btn-app">
+                            <i class="fab fa-apple" aria-hidden="true"></i>
+                            Download for iOS
+                        </button>
+                        <button class="btn btn-app">
+                            <i class="fab fa-google-play" aria-hidden="true"></i>
+                            Get it on Android
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <i class="fas fa-water" aria-hidden="true"></i>
+                        <span>ShoreSquad</span>
+                    </div>
+                    <p>Making beach cleanups fun, social, and impactful for young eco-warriors worldwide.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" aria-label="Follow us on Facebook">
+                            <i class="fab fa-facebook" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="social-link" aria-label="Follow us on Twitter">
+                            <i class="fab fa-twitter" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="social-link" aria-label="Follow us on Instagram">
+                            <i class="fab fa-instagram" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="social-link" aria-label="Follow us on TikTok">
+                            <i class="fab fa-tiktok" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Community</h4>
+                        <ul>
+                            <li><a href="#">Find Events</a></li>
+                            <li><a href="#">Squad Leaders</a></li>
+                            <li><a href="#">Success Stories</a></li>
+                            <li><a href="#">Blog</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Support</h4>
+                        <ul>
+                            <li><a href="#">Help Center</a></li>
+                            <li><a href="#">Contact Us</a></li>
+                            <li><a href="#">Report Issue</a></li>
+                            <li><a href="#">Safety Guidelines</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <ul>
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Terms of Service</a></li>
+                            <li><a href="#">Cookie Policy</a></li>
+                            <li><a href="#">Community Guidelines</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 ShoreSquad. All rights reserved. Made with 💚 for our oceans.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" onclick="scrollToTop()" aria-label="Back to top" title="Back to top">
+        <i class="fas fa-chevron-up" aria-hidden="true"></i>
+    </button>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loading-spinner" aria-hidden="true">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/app.js"></script>
+</body>
+</html>

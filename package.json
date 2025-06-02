@@ -1,0 +1,51 @@
+{
+  "name": "shoresquad",
+  "version": "1.0.0",
+  "description": "Rally your crew, track weather, and hit the next beach cleanup with our dope map app!",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server --port=5500 --open=index.html",
+    "dev": "live-server --port=5500 --open=index.html --watch=.",
+    "build": "echo 'No build process needed for static site'",
+    "test": "echo 'No tests specified yet'",
+    "validate": "html-validate index.html && stylelint css/styles.css",
+    "format": "prettier --write ."
+  },
+  "keywords": [
+    "beach-cleanup",
+    "environmental",
+    "community",
+    "weather-tracking",
+    "map-app",
+    "eco-friendly",
+    "sustainability",
+    "ocean-conservation"
+  ],
+  "author": "ShoreSquad Team",
+  "license": "MIT",
+  "homepage": "https://shoresquad.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shoresquad/shoresquad.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shoresquad/shoresquad/issues"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "html-validate": "^8.0.0",
+    "stylelint": "^15.0.0",
+    "stylelint-config-standard": "^34.0.0",
+    "prettier": "^3.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ],
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}
