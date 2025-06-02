@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShoreSquad Weather Debug</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .debug-log { 
+            background: #f0f0f0; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            font-family: monospace; 
+            font-size: 12px; 
+            max-height: 200px; 
+            overflow-y: auto; 
+        }
+        .weather-test { 
+            max-width: 800px; 
+            margin: 20px auto; 
+            padding: 20px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="weather-test">
+        <h1>ShoreSquad Weather Integration Test</h1>
+        
+        <button onclick="testSingaporeWeather()" style="padding: 10px 20px; margin: 10px; cursor: pointer;">
+            Test Singapore Weather
+        </button>
+        
+        <button onclick="clearLog()" style="padding: 10px 20px; margin: 10px; cursor: pointer;">
+            Clear Log
+        </button>
+        
+        <div id="debug-log" class="debug-log"></div>
+        
+        <div class="weather-widget" id="weather-widget">
+            <div class="weather-display" id="weather-display">
+                <!-- Weather data will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Override console.log to also display on page
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        function logToPage(message, isError = false) {
+            const debugLog = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.style.color = isError ? 'red' : 'black';
+            div.textContent = `[${timestamp}] ${message}`;
+            debugLog.appendChild(div);
+            debugLog.scrollTop = debugLog.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            logToPage(args.join(' '));
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            logToPage(args.join(' '), true);
+        };
+        
+        function clearLog() {
+            document.getElementById('debug-log').innerHTML = '';
+        }
+        
+        async function testSingaporeWeather() {
+            clearLog();
+            console.log('Starting Singapore weather test...');
+            
+            try {
+                await getSingaporeWeather();
+                console.log('Singapore weather test completed');
+            } catch (error) {
+                console.error('Singapore weather test failed:', error);
+            }
+        }
+        
+        // Auto-start test when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, starting automatic test...');
+            testSingaporeWeather();
+        });
+    </script>
+</body>
+</html>

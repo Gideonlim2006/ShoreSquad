@@ -10,6 +10,14 @@
 const CONFIG = {
     WEATHER_API_KEY: 'demo_key', // Replace with actual OpenWeatherMap API key
     WEATHER_API_URL: 'https://api.openweathermap.org/data/2.5/weather',
+    // Singapore NEA API endpoints - No API key required for public data
+    NEA_API_BASE: 'https://api.data.gov.sg/v1/environment',
+    NEA_REALTIME_WEATHER: 'https://api.data.gov.sg/v1/environment/realtime-weather-readings',
+    NEA_FORECAST: 'https://api.data.gov.sg/v1/environment/4-day-weather-forecast',
+    NEA_RAIN_AREAS: 'https://api.data.gov.sg/v1/environment/rain-areas',
+    NEA_AIR_TEMP: 'https://api.data.gov.sg/v1/environment/air-temperature',
+    NEA_RELATIVE_HUMIDITY: 'https://api.data.gov.sg/v1/environment/relative-humidity',
+    NEA_RAINFALL: 'https://api.data.gov.sg/v1/environment/rainfall',
     GEOLOCATION_TIMEOUT: 10000,
     ANIMATION_DURATION: 300,
     SCROLL_THRESHOLD: 200
@@ -19,6 +27,8 @@ const CONFIG = {
 const appState = {
     currentLocation: null,
     weatherData: null,
+    forecastData: null,
+    realtimeData: null,
     events: [],
     filteredEvents: [],
     isLoading: false,
@@ -428,30 +438,30 @@ function displayWeather(weatherData) {
  */
 async function getWeather() {
     const locationInput = document.getElementById('location-input');
-    const location = locationInput.value.trim();
+    const location = locationInput.value.trim().toLowerCase();
     
     if (!location) {
-        // Try to get current location
-        try {
-            showLoading();
-            const coords = await getCurrentLocation();
-            const weatherData = await fetchWeatherData(coords);
-            displayWeather(weatherData);
-            locationInput.value = weatherData.name;
-        } catch (error) {
-            showError(error.message);
-        } finally {
-            hideLoading();
-        }
+        // Default to Singapore weather
+        getSingaporeWeather();
         return;
     }
 
+    // Check if location is Singapore
+    if (location.includes('singapore') || location.includes('sg') || location === 'singapore') {
+        getSingaporeWeather();
+        locationInput.value = 'Singapore';
+        return;
+    }
+
+    // For other locations, use OpenWeatherMap API
     try {
         showLoading();
         const weatherData = await fetchWeatherData(location);
         displayWeather(weatherData);
     } catch (error) {
-        showError(error.message);
+        showError('Weather data not available for this location. Showing Singapore weather instead.');
+        getSingaporeWeather();
+        locationInput.value = 'Singapore';
     } finally {
         hideLoading();
     }
@@ -471,18 +481,9 @@ function initWeather() {
             }
         });
 
-        // Try to get current location weather on load
-        getCurrentLocation()
-            .then(coords => fetchWeatherData(coords))
-            .then(weatherData => {
-                displayWeather(weatherData);
-                locationInput.placeholder = `Weather for ${weatherData.name}`;
-            })
-            .catch(error => {
-                console.log('Could not get current location weather:', error.message);
-                // Display demo weather data
-                displayDemoWeather();
-            });
+        // Load Singapore weather by default using NEA API
+        getSingaporeWeather();
+        locationInput.placeholder = 'Weather for Singapore';
     }
 }
 
@@ -491,19 +492,396 @@ function initWeather() {
  */
 function displayDemoWeather() {
     const demoWeather = {
-        name: 'Santa Monica',
-        sys: { country: 'US' },
+        name: 'Singapore',
+        sys: { country: 'SG' },
         main: {
-            temp: 22,
-            feels_like: 24,
-            humidity: 65
+            temp: 28,
+            feels_like: 32,
+            humidity: 75
         },
         weather: [{ description: 'partly cloudy' }],
-        wind: { speed: 3.5 },
+        wind: { speed: 2.5 },
         visibility: 10000
     };
     
     displayWeather(demoWeather);
+}
+
+// ===================================
+// NEA SINGAPORE WEATHER API
+// ===================================
+
+/**
+ * Fetch Singapore NEA realtime weather data
+ */
+async function fetchNEARealtimeWeather() {
+    try {
+        console.log('Fetching individual NEA weather components...');
+        // Fetch individual weather components
+        const [airTempResponse, humidityResponse, rainfallResponse] = await Promise.all([
+            fetch(CONFIG.NEA_AIR_TEMP),
+            fetch(CONFIG.NEA_RELATIVE_HUMIDITY),
+            fetch(CONFIG.NEA_RAINFALL)
+        ]);
+        
+        console.log('API responses:', {
+            airTemp: airTempResponse.status,
+            humidity: humidityResponse.status,
+            rainfall: rainfallResponse.status
+        });
+        
+        if (!airTempResponse.ok || !humidityResponse.ok || !rainfallResponse.ok) {
+            throw new Error('Failed to fetch NEA realtime weather data');
+        }
+        
+        const [airTempData, humidityData, rainfallData] = await Promise.all([
+            airTempResponse.json(),
+            humidityResponse.json(),
+            rainfallResponse.json()
+        ]);
+        
+        console.log('Raw data lengths:', {
+            airTemp: airTempData.items?.[0]?.readings?.length || 0,
+            humidity: humidityData.items?.[0]?.readings?.length || 0,
+            rainfall: rainfallData.items?.[0]?.readings?.length || 0
+        });
+        
+        // Combine data into expected format
+        const combinedData = {
+            items: [{
+                timestamp: airTempData.items?.[0]?.timestamp || new Date().toISOString(),
+                readings: {
+                    air_temperature: airTempData.items?.[0]?.readings || [],
+                    relative_humidity: humidityData.items?.[0]?.readings || [],
+                    rainfall: rainfallData.items?.[0]?.readings || []
+                }
+            }]
+        };
+        
+        appState.realtimeData = combinedData;
+        return combinedData;
+    } catch (error) {
+        console.error('NEA realtime weather fetch error:', error);
+        throw error;
+    }
+}
+
+/**
+ * Fetch Singapore NEA 4-day weather forecast
+ */
+async function fetchNEAForecast() {
+    try {
+        const response = await fetch(CONFIG.NEA_FORECAST);
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch NEA forecast data');
+        }
+        
+        const data = await response.json();
+        appState.forecastData = data;
+        return data;
+    } catch (error) {
+        console.error('NEA forecast fetch error:', error);
+        throw error;
+    }
+}
+
+/**
+ * Process and combine NEA weather data
+ */
+function processNEAWeatherData(realtimeData, forecastData) {
+    const processed = {
+        current: null,
+        forecast: []
+    };
+
+    // Process current conditions from realtime data
+    if (realtimeData && realtimeData.items && realtimeData.items.length > 0) {
+        const latest = realtimeData.items[0];
+        const readings = latest.readings;
+        
+        // Get average values from all stations
+        const avgTemp = readings.air_temperature ? 
+            readings.air_temperature.reduce((sum, station) => sum + station.value, 0) / readings.air_temperature.length : null;
+        
+        const avgHumidity = readings.relative_humidity ? 
+            readings.relative_humidity.reduce((sum, station) => sum + station.value, 0) / readings.relative_humidity.length : null;
+        
+        const avgRainfall = readings.rainfall ? 
+            readings.rainfall.reduce((sum, station) => sum + station.value, 0) / readings.rainfall.length : null;
+
+        processed.current = {
+            temperature: avgTemp ? Math.round(avgTemp) : null,
+            humidity: avgHumidity ? Math.round(avgHumidity) : null,
+            rainfall: avgRainfall ? avgRainfall.toFixed(1) : 0,
+            timestamp: latest.timestamp,
+            location: 'Singapore'
+        };
+    }
+
+    // Process 4-day forecast
+    if (forecastData && forecastData.items && forecastData.items.length > 0) {
+        const forecast = forecastData.items[0];
+        
+        processed.forecast = forecast.forecasts.map(day => ({
+            date: day.date,
+            forecast: day.forecast,
+            temperature: day.temperature,
+            humidity: day.relative_humidity,
+            wind: day.wind
+        }));
+    }
+
+    return processed;
+}
+
+/**
+ * Display NEA weather forecast
+ */
+function displayNEAWeather(processedData) {
+    const weatherDisplay = document.getElementById('weather-display');
+    if (!weatherDisplay) return;
+
+    const { current, forecast } = processedData;
+    
+    // Current conditions
+    const currentTemp = current?.temperature || 28;
+    const currentHumidity = current?.humidity || 75;
+    const currentRainfall = current?.rainfall || 0;
+    
+    // Determine cleanup suitability
+    const isGoodForCleanup = currentTemp > 20 && currentTemp < 35 && currentRainfall < 1.0 && currentHumidity < 85;
+    const suitabilityClass = isGoodForCleanup ? 'good' : 'poor';
+    const suitabilityText = isGoodForCleanup ? 'Perfect for beach cleanup!' : 'Check weather conditions';
+
+    weatherDisplay.innerHTML = `
+        <div class="weather-current">
+            <h3>Singapore Weather</h3>
+            <div class="weather-temp">${currentTemp}°C</div>
+            <div class="weather-condition">Current Conditions</div>
+            <div class="cleanup-suitability ${suitabilityClass}">
+                <i class="fas ${isGoodForCleanup ? 'fa-check-circle' : 'fa-exclamation-triangle'}" aria-hidden="true"></i>
+                ${suitabilityText}
+            </div>
+        </div>
+        <div class="weather-details">
+            <div class="weather-detail">
+                <div class="weather-detail-label">Humidity</div>
+                <div class="weather-detail-value">${currentHumidity}%</div>
+            </div>
+            <div class="weather-detail">
+                <div class="weather-detail-label">Rainfall</div>
+                <div class="weather-detail-value">${currentRainfall} mm</div>
+            </div>
+            <div class="weather-detail">
+                <div class="weather-detail-label">Location</div>
+                <div class="weather-detail-value">Singapore</div>
+            </div>
+        </div>
+        <div class="weather-forecast">
+            <h4>4-Day Forecast</h4>
+            <div class="forecast-grid">
+                ${forecast.map((day, index) => {
+                    const date = new Date(day.date);
+                    const dayName = index === 0 ? 'Today' : date.toLocaleDateString('en-SG', { weekday: 'short' });
+                    const dateStr = date.toLocaleDateString('en-SG', { day: 'numeric', month: 'short' });
+                    
+                    return `
+                        <div class="forecast-day">
+                            <div class="forecast-date">
+                                <div class="forecast-day-name">${dayName}</div>
+                                <div class="forecast-date-str">${dateStr}</div>
+                            </div>
+                            <div class="forecast-temp">
+                                <span class="temp-high">${day.temperature.high}°</span>
+                                <span class="temp-low">${day.temperature.low}°</span>
+                            </div>
+                            <div class="forecast-condition">
+                                ${day.forecast}
+                            </div>
+                            <div class="forecast-humidity">
+                                <i class="fas fa-tint" aria-hidden="true"></i>
+                                ${day.humidity.high}%
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+
+    // Add forecast styles if not already added
+    if (!document.querySelector('#forecast-styles')) {
+        const style = document.createElement('style');
+        style.id = 'forecast-styles';
+        style.textContent = `
+            .weather-forecast {
+                margin-top: var(--spacing-xl);
+                padding-top: var(--spacing-xl);
+                border-top: 2px solid rgba(30, 144, 255, 0.1);
+            }
+            
+            .weather-forecast h4 {
+                color: var(--primary);
+                margin-bottom: var(--spacing-lg);
+                text-align: center;
+                font-size: var(--font-size-lg);
+            }
+            
+            .forecast-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: var(--spacing-md);
+            }
+            
+            .forecast-day {
+                background: rgba(30, 144, 255, 0.05);
+                border-radius: var(--radius-lg);
+                padding: var(--spacing-md);
+                text-align: center;
+                border: 1px solid rgba(30, 144, 255, 0.1);
+                transition: var(--transition-fast);
+            }
+            
+            .forecast-day:hover {
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-md);
+            }
+            
+            .forecast-date {
+                margin-bottom: var(--spacing-sm);
+            }
+            
+            .forecast-day-name {
+                font-weight: 600;
+                color: var(--primary);
+                font-size: var(--font-size-sm);
+            }
+            
+            .forecast-date-str {
+                color: var(--text-secondary);
+                font-size: var(--font-size-xs);
+            }
+            
+            .forecast-temp {
+                margin-bottom: var(--spacing-sm);
+            }
+            
+            .temp-high {
+                font-weight: 700;
+                font-size: var(--font-size-lg);
+                color: var(--text-primary);
+            }
+            
+            .temp-low {
+                font-weight: 400;
+                font-size: var(--font-size-base);
+                color: var(--text-secondary);
+                margin-left: var(--spacing-xs);
+            }
+            
+            .forecast-condition {
+                font-size: var(--font-size-xs);
+                color: var(--text-secondary);
+                margin-bottom: var(--spacing-xs);
+                line-height: 1.3;
+            }
+            
+            .forecast-humidity {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: var(--spacing-xs);
+                font-size: var(--font-size-xs);
+                color: var(--primary);
+            }
+            
+            @media (max-width: 768px) {
+                .forecast-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: var(--spacing-sm);
+                }
+                
+                .forecast-day {
+                    padding: var(--spacing-sm);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+/**
+ * Get Singapore weather using NEA API
+ */
+async function getSingaporeWeather() {
+    try {
+        console.log('Starting NEA Singapore weather fetch...');
+        showLoading();
+        
+        // Fetch both realtime and forecast data
+        console.log('Fetching realtime and forecast data...');
+        const [realtimeData, forecastData] = await Promise.all([
+            fetchNEARealtimeWeather(),
+            fetchNEAForecast()
+        ]);
+        
+        console.log('Data fetched successfully, processing...');
+        // Process and display the data
+        const processedData = processNEAWeatherData(realtimeData, forecastData);
+        console.log('Processed data:', processedData);
+        displayNEAWeather(processedData);
+        
+    } catch (error) {
+        console.error('Error fetching Singapore weather:', error);
+        console.log('Falling back to demo weather data...');
+        // Fallback to demo data
+        displayNEADemoWeather();
+    } finally {
+        hideLoading();
+    }
+}
+
+/**
+ * Display demo NEA weather data when API is not available
+ */
+function displayNEADemoWeather() {
+    const demoData = {
+        current: {
+            temperature: 29,
+            humidity: 78,
+            rainfall: 0.2,
+            location: 'Singapore'
+        },
+        forecast: [
+            {
+                date: '2025-06-02',
+                forecast: 'Partly Cloudy (Day), Partly Cloudy (Night)',
+                temperature: { low: 26, high: 32 },
+                humidity: { low: 60, high: 85 }
+            },
+            {
+                date: '2025-06-03',
+                forecast: 'Thundery Showers',
+                temperature: { low: 25, high: 30 },
+                humidity: { low: 70, high: 90 }
+            },
+            {
+                date: '2025-06-04',
+                forecast: 'Partly Cloudy (Day), Fair (Night)',
+                temperature: { low: 26, high: 33 },
+                humidity: { low: 60, high: 80 }
+            },
+            {
+                date: '2025-06-05',
+                forecast: 'Fair (Day), Partly Cloudy (Night)',
+                temperature: { low: 27, high: 34 },
+                humidity: { low: 65, high: 85 }
+            }
+        ]
+    };
+    
+    displayNEAWeather(demoData);
 }
 
 // ===================================
@@ -516,80 +894,80 @@ function displayDemoWeather() {
 const sampleEvents = [
     {
         id: 1,
-        title: 'Santa Monica Beach Cleanup',
+        title: 'Sentosa Beach Cleanup',
         date: '2025-06-15',
         time: '09:00',
-        location: 'Santa Monica Beach, CA',
+        location: 'Sentosa Beach, Singapore',
         description: 'Join us for our weekly beach cleanup! We provide all supplies and refreshments.',
         participants: 24,
         maxParticipants: 40,
         difficulty: 'easy',
-        organizer: 'LA Coast Squad',
+        organizer: 'Singapore Coast Squad',
         image: null
     },
     {
         id: 2,
-        title: 'Malibu Rocky Shore Challenge',
+        title: 'East Coast Park Challenge',
         date: '2025-06-16',
         time: '07:30',
-        location: 'Malibu Point, CA',
-        description: 'Advanced cleanup focusing on rocky areas and tidal pools. Experience recommended.',
+        location: 'East Coast Park, Singapore',
+        description: 'Advanced cleanup focusing on rocky areas and coastal vegetation. Experience recommended.',
         participants: 12,
         maxParticipants: 20,
         difficulty: 'hard',
-        organizer: 'Malibu Eco Warriors',
+        organizer: 'Singapore Eco Warriors',
         image: null
     },
     {
         id: 3,
-        title: 'Family-Friendly Venice Cleanup',
+        title: 'Family-Friendly Marina Bay Cleanup',
         date: '2025-06-17',
         time: '10:00',
-        location: 'Venice Beach, CA',
-        description: 'Perfect for families! Educational activities for kids while we clean the beach.',
+        location: 'Marina Bay, Singapore',
+        description: 'Perfect for families! Educational activities for kids while we clean the waterfront.',
         participants: 31,
         maxParticipants: 50,
         difficulty: 'easy',
-        organizer: 'Venice Green Team',
+        organizer: 'Marina Green Team',
         image: null
     },
     {
         id: 4,
-        title: 'Manhattan Beach Morning Mission',
+        title: 'Changi Beach Morning Mission',
         date: '2025-06-18',
         time: '08:00',
-        location: 'Manhattan Beach, CA',
-        description: 'Early morning cleanup followed by optional beach volleyball and coffee.',
+        location: 'Changi Beach, Singapore',
+        description: 'Early morning cleanup followed by optional beach games and refreshments.',
         participants: 18,
         maxParticipants: 30,
         difficulty: 'medium',
-        organizer: 'South Bay Squad',
+        organizer: 'East Side Squad',
         image: null
     },
     {
         id: 5,
-        title: 'Redondo Beach Pier Cleanup',
+        title: 'Labrador Park Coastal Cleanup',
         date: '2025-06-19',
         time: '09:30',
-        location: 'Redondo Beach Pier, CA',
-        description: 'Focus on pier area and surrounding beach. Great for beginners!',
+        location: 'Labrador Park, Singapore',
+        description: 'Focus on park coastline and nature trails. Great for beginners!',
         participants: 22,
         maxParticipants: 35,
         difficulty: 'easy',
-        organizer: 'Redondo Eco Squad',
+        organizer: 'Labrador Eco Squad',
         image: null
     },
     {
         id: 6,
-        title: 'El Segundo Beach Restoration',
+        title: 'Pulau Ubin Beach Restoration',
         date: '2025-06-21',
         time: '08:30',
-        location: 'El Segundo Beach, CA',
-        description: 'Comprehensive cleanup and dune restoration project. Tools provided.',
+        location: 'Pulau Ubin, Singapore',
+        description: 'Comprehensive cleanup and mangrove restoration project. Tools provided.',
         participants: 8,
         maxParticipants: 25,
         difficulty: 'medium',
-        organizer: 'South Coast Guardians',
+        organizer: 'Island Guardians',
         image: null
     }
 ];
@@ -849,10 +1227,10 @@ function loadMoreEvents() {
     const additionalEvents = [
         {
             id: 7,
-            title: 'Hermosa Beach Dawn Patrol',
+            title: 'Tanjong Beach Dawn Patrol',
             date: '2025-06-22',
             time: '06:30',
-            location: 'Hermosa Beach, CA',
+            location: 'Tanjong Beach, Sentosa',
             description: 'Early bird cleanup for the dedicated! Watch the sunrise while making a difference.',
             participants: 5,
             maxParticipants: 15,
@@ -862,15 +1240,15 @@ function loadMoreEvents() {
         },
         {
             id: 8,
-            title: 'Torrance Beach Community Day',
+            title: 'Coney Island Community Day',
             date: '2025-06-23',
             time: '11:00',
-            location: 'Torrance Beach, CA',
-            description: 'Family event with BBQ lunch included! Perfect for first-time volunteers.',
+            location: 'Coney Island Park, Singapore',
+            description: 'Family event with picnic lunch included! Perfect for first-time volunteers.',
             participants: 15,
             maxParticipants: 60,
             difficulty: 'easy',
-            organizer: 'Torrance Green Initiative',
+            organizer: 'North Shore Green Initiative',
             image: null
         }
     ];

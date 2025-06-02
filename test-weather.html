@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>NEA Weather API Test</h1>
+    
+    <button onclick="testIndividualAPIs()">Test Individual APIs</button>
+    <button onclick="testForecastAPI()">Test 4-Day Forecast</button>
+    <button onclick="testIntegratedWeather()">Test Integrated Weather Function</button>
+    
+    <div id="results"></div>
+
+    <script>
+        // Copy the CONFIG from app.js
+        const CONFIG = {
+            NEA_FORECAST: 'https://api.data.gov.sg/v1/environment/4-day-weather-forecast',
+            NEA_AIR_TEMP: 'https://api.data.gov.sg/v1/environment/air-temperature',
+            NEA_RELATIVE_HUMIDITY: 'https://api.data.gov.sg/v1/environment/relative-humidity',
+            NEA_RAINFALL: 'https://api.data.gov.sg/v1/environment/rainfall'
+        };
+
+        function log(message, isError = false) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${isError ? 'error' : 'success'}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            results.appendChild(div);
+        }
+
+        async function testIndividualAPIs() {
+            log('Testing individual NEA APIs...');
+            
+            try {
+                const [airTemp, humidity, rainfall] = await Promise.all([
+                    fetch(CONFIG.NEA_AIR_TEMP),
+                    fetch(CONFIG.NEA_RELATIVE_HUMIDITY),
+                    fetch(CONFIG.NEA_RAINFALL)
+                ]);
+
+                log(`Air Temperature API: ${airTemp.ok ? 'SUCCESS' : 'FAILED'} (${airTemp.status})`);
+                log(`Relative Humidity API: ${humidity.ok ? 'SUCCESS' : 'FAILED'} (${humidity.status})`);
+                log(`Rainfall API: ${rainfall.ok ? 'SUCCESS' : 'FAILED'} (${rainfall.status})`);
+
+                if (airTemp.ok) {
+                    const airTempData = await airTemp.json();
+                    log(`Air temp data: ${airTempData.items?.[0]?.readings?.length || 0} readings`);
+                }
+            } catch (error) {
+                log(`Error testing individual APIs: ${error.message}`, true);
+            }
+        }
+
+        async function testForecastAPI() {
+            log('Testing 4-day forecast API...');
+            
+            try {
+                const response = await fetch(CONFIG.NEA_FORECAST);
+                log(`Forecast API: ${response.ok ? 'SUCCESS' : 'FAILED'} (${response.status})`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`Forecast data: ${data.items?.[0]?.forecasts?.length || 0} days`);
+                    if (data.items?.[0]?.forecasts?.[0]) {
+                        const firstDay = data.items[0].forecasts[0];
+                        log(`First day: ${firstDay.date} - ${firstDay.forecast} (${firstDay.temperature.low}°-${firstDay.temperature.high}°)`);
+                    }
+                }
+            } catch (error) {
+                log(`Error testing forecast API: ${error.message}`, true);
+            }
+        }
+
+        async function testIntegratedWeather() {
+            log('Testing integrated weather function...');
+            
+            try {
+                // Test the combined approach
+                const [airTempResponse, humidityResponse, rainfallResponse] = await Promise.all([
+                    fetch(CONFIG.NEA_AIR_TEMP),
+                    fetch(CONFIG.NEA_RELATIVE_HUMIDITY),
+                    fetch(CONFIG.NEA_RAINFALL)
+                ]);
+                
+                const [airTempData, humidityData, rainfallData] = await Promise.all([
+                    airTempResponse.json(),
+                    humidityResponse.json(),
+                    rainfallResponse.json()
+                ]);
+                
+                // Calculate averages like the main app does
+                const readings = {
+                    air_temperature: airTempData.items?.[0]?.readings || [],
+                    relative_humidity: humidityData.items?.[0]?.readings || [],
+                    rainfall: rainfallData.items?.[0]?.readings || []
+                };
+                
+                const avgTemp = readings.air_temperature.length > 0 ? 
+                    readings.air_temperature.reduce((sum, station) => sum + station.value, 0) / readings.air_temperature.length : null;
+                
+                const avgHumidity = readings.relative_humidity.length > 0 ? 
+                    readings.relative_humidity.reduce((sum, station) => sum + station.value, 0) / readings.relative_humidity.length : null;
+                
+                const avgRainfall = readings.rainfall.length > 0 ? 
+                    readings.rainfall.reduce((sum, station) => sum + station.value, 0) / readings.rainfall.length : null;
+
+                log(`Average Temperature: ${avgTemp ? Math.round(avgTemp) + '°C' : 'N/A'}`);
+                log(`Average Humidity: ${avgHumidity ? Math.round(avgHumidity) + '%' : 'N/A'}`);
+                log(`Average Rainfall: ${avgRainfall ? avgRainfall.toFixed(1) + 'mm' : 'N/A'}`);
+                
+                log('Integrated weather function test completed successfully!');
+                
+            } catch (error) {
+                log(`Error in integrated weather test: ${error.message}`, true);
+            }
+        }
+    </script>
+</body>
+</html>
