@@ -19,9 +19,12 @@
     <meta name="twitter:description" content="Rally your crew, track weather, and hit the next beach cleanup with our dope map app!">
     
     <title>ShoreSquad - Rally Your Crew for Beach Cleanups</title>
-    
-    <!-- Favicon -->
+      <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
     
     <!-- CSS -->
     <link rel="stylesheet" href="css/styles.css">
@@ -52,9 +55,11 @@
             <ul class="nav-menu" role="menubar">
                 <li class="nav-item" role="none">
                     <a href="#home" class="nav-link" role="menuitem">Home</a>
+                </li>                <li class="nav-item" role="none">
+                    <a href="#events" class="nav-link" role="menuitem">Events</a>
                 </li>
                 <li class="nav-item" role="none">
-                    <a href="#events" class="nav-link" role="menuitem">Events</a>
+                    <a href="#next-location" class="nav-link" role="menuitem">Next Location</a>
                 </li>
                 <li class="nav-item" role="none">
                     <a href="#weather" class="nav-link" role="menuitem">Weather</a>
@@ -158,6 +163,58 @@
                     <button class="btn btn-outline" onclick="loadMoreEvents()">
                         Load More Events
                     </button>
+                </div>
+            </div>        </section>
+
+        <!-- Next Cleanup Location Section -->
+        <section id="next-location" class="next-location" aria-labelledby="next-location-title">
+            <div class="container">
+                <h2 id="next-location-title" class="section-title">Next Cleanup Location</h2>
+                <div class="location-content">
+                    <div class="location-info">
+                        <h3>📍 Pasir Ris Beach, Singapore</h3>
+                        <p class="location-description">
+                            Join us at the beautiful Pasir Ris Beach for our next community cleanup event! 
+                            This family-friendly location offers easy access and stunning coastal views.
+                        </p>
+                        <div class="location-details">
+                            <div class="detail-item">
+                                <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                                <span>Next Weekend</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-clock" aria-hidden="true"></i>
+                                <span>9:00 AM - 12:00 PM</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-users" aria-hidden="true"></i>
+                                <span>Expected: 25-30 participants</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="joinNextCleanup()">
+                            <i class="fas fa-hand-paper" aria-hidden="true"></i>
+                            Join This Cleanup
+                        </button>
+                    </div>
+                    <div class="map-container">
+                        <iframe 
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.5849088942546!2d103.95357397499556!3d1.3814970986412855!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da3e1e9b1c5b5b%3A0x8b1c5b5b9b1c5b5b!2sNext%20Cleanup%20-%20Pasir%20Ris%20Beach!5e0!3m2!1sen!2ssg!4v1733158800000!5m2!1sen!2ssg&markers=color:red%7Clabel:🧹%7C1.381497,103.955574"
+                            width="100%" 
+                            height="300" 
+                            style="border:0; border-radius: 12px;" 
+                            allowfullscreen="" 
+                            loading="lazy" 
+                            referrerpolicy="no-referrer-when-downgrade"
+                            aria-label="Map showing next cleanup location at Pasir Ris Beach"
+                            title="Next Cleanup Location - Pasir Ris Beach, Singapore">
+                        </iframe>
+                        <div class="map-overlay">
+                            <div class="map-pin-info">
+                                <i class="fas fa-map-pin" aria-hidden="true"></i>
+                                <span>Next Cleanup Location</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

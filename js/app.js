@@ -160,6 +160,45 @@ function scrollToTop() {
 }
 
 /**
+ * Join next cleanup event function
+ */
+function joinNextCleanup() {
+    // Show confirmation dialog
+    const confirmed = confirm(
+        "🌊 Ready to join the Pasir Ris Beach cleanup?\n\n" +
+        "📅 Date: Next Weekend\n" +
+        "⏰ Time: 9:00 AM - 12:00 PM\n" +
+        "📍 Location: Pasir Ris Beach, Singapore\n\n" +
+        "We'll send you reminder notifications and cleanup kit details. Continue?"
+    );
+    
+    if (confirmed) {
+        // Simulate registration process
+        showNotification('success', '🎉 Welcome to the squad! Registration confirmed for Pasir Ris Beach cleanup.');
+        
+        // Update UI to show registered state
+        const joinButton = document.querySelector('.next-location .btn-primary');
+        if (joinButton) {
+            joinButton.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i> Registered!';
+            joinButton.style.background = 'var(--success)';
+            joinButton.disabled = true;
+            
+            // Reset button after 3 seconds for demo purposes
+            setTimeout(() => {
+                joinButton.innerHTML = '<i class="fas fa-hand-paper" aria-hidden="true"></i> Join This Cleanup';
+                joinButton.style.background = '';
+                joinButton.disabled = false;
+            }, 3000);
+        }
+        
+        // Scroll to contact section for more info
+        setTimeout(() => {
+            scrollToSection('contact');
+        }, 1500);
+    }
+}
+
+/**
  * Format date for display
  */
 function formatDate(dateString) {
